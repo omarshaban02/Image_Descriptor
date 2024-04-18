@@ -5,6 +5,7 @@ import pyqtgraph as pg
 import cv2
 from PyQt5.uic import loadUiType
 from classes import Image, Features
+import time
 
 
 ui, _ = loadUiType('main.ui')
@@ -12,6 +13,11 @@ ui, _ = loadUiType('main.ui')
 class ImageDescriptor(QMainWindow, ui):
     def __init__(self):
         super(ImageDescriptor, self).__init__()
+        self.time_taken = 0
+        self.loaded_image = None
+        self.gray_detected_img = None
+        self.color_detected_img = None
+        self.features = None
         self.setupUi(self)
         
         self.plotwidget_set = [self.wgt_img_input, self.wgt_edge_color, self.wgt_edge_grey]
@@ -23,18 +29,26 @@ class ImageDescriptor(QMainWindow, ui):
         
         # Connect Openfile Action to its function
         self.actionOpen.triggered.connect(self.open_image)
-    
+        self.lambda_chkBox.clicked.connect(self.corner_detection)
     ############################### Connections ##################################################
             
     ################################ Corner Detection Lambda Minus ###############################
     def corner_detection(self):
-        if self.lambda_chkBox.isChecked():
-            color_detected_img, gray_detected_img = self.features.find_corners()
-            # self.display_image(self.item_input, self.loaded_image)
-            self.display_image(self.item_output_grey, gray_detected_img)
-            self.display_image(self.item_output_color, color_detected_img)
-        elif self.harris_chkBox.isChecked():
-            None
+        if self.features is not None:
+            if self.lambda_chkBox.isChecked():
+                self.color_detected_img, self.gray_detected_img, self.time_taken = self.features.find_corners()
+                self.lambda_lcdNumber.display(self.time_taken)
+                self.display_image(self.item_output_grey, self.gray_detected_img)
+                self.display_image(self.item_output_color, self.color_detected_img)
+
+            elif self.harris_chkBox.isChecked():
+                self.color_detected_img, self.gray_detected_img, self.time_taken = self.features.harris_corner_detection()
+                self.harris_lcdNumber.display(self.time_taken)
+                self.display_image(self.item_output_grey,self.gray_detected_img)
+                self.display_image(self.item_output_color, self.color_detected_img)
+        else:
+            pass
+                
     ##############################################################################################    
     ################################# Misc Functions #############################################
     
@@ -51,10 +65,19 @@ class ImageDescriptor(QMainWindow, ui):
         # Loads the image using imread, converts it to RGB, then rotates it 90 degrees clockwise
         self.loaded_image = cv2.rotate(cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB), cv2.ROTATE_90_CLOCKWISE)
         self.img_obj = Image(self.loaded_image)
-        self.features = Features(self.loaded_image)
         self.gray_scale_image = self.img_obj.gray_scale_image
+        self.features = Features(self.loaded_image)
         self.display_image(self.item_input, self.loaded_image)
-        
+
+        # reset when load a new image
+        self.lambda_lcdNumber.display(0)
+        self.harris_lcdNumber.display(0)
+        self.harris_chkBox.setCheckState(False)
+        self.lambda_chkBox.setCheckState(False)
+        self.item_output_grey.clear()
+        self.item_output_color.clear()
+
+
         
     @staticmethod
     def display_image(image_item, image):

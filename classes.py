@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import time
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 
@@ -83,6 +84,7 @@ class Image:
 class Features:
     def __init__(self, image):
         self.image = image
+        self.gray_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         self.sobel_x = None
         self.sobel_y = None
         self.sobel_xy = None
@@ -102,7 +104,6 @@ class Features:
         sobelxy = cv2.Sobel(img, cv2.CV_64F, 1, 1, ksize=5)  
 
         return  sobelx, sobely, sobelxy
-         
 
     def find_corners(self):
         """
@@ -115,6 +116,7 @@ class Features:
             None
         """
         # Load the image
+        start_time = time.time()
         img = self.image
 
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -137,7 +139,8 @@ class Features:
         # Apply thresholding
         threshold = 0.1 * eigenvalues.max()  # You can adjust this threshold
         corners = np.where(eigenvalues > threshold)
-
+        end_time = time.time()
+        time_taken = end_time - start_time
         # Draw circles at detected corners on the original color image
         img_color = img.copy()
         for i, j in zip(*corners):
@@ -148,4 +151,51 @@ class Features:
         for i, j in zip(*corners):
             cv2.circle(gray_img_color, (j, i), 1, (0, 255, 0), -1)  # Green color
 
-        return img_color, gray_img_color
+        return img_color, gray_img_color, time_taken
+
+    def harris_corner_detection(self, ksize=3, k=0.04, threshold=0.01):
+        start_time = time.time()
+        gray = self.gray_image.copy()
+
+        # Calculates Gradient (first derivative) using Sobel derivatives
+        dx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=ksize)
+        dy = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=ksize)
+
+        # Harris corner response
+        Ixx = dx ** 2
+        Iyy = dy ** 2
+        Ixy = dx * dy
+
+        # Convolution with Gaussian filter
+        Sxx = cv2.GaussianBlur(Ixx, (ksize, ksize), sigmaX=2)
+        Syy = cv2.GaussianBlur(Iyy, (ksize, ksize), sigmaX=2)
+        Sxy = cv2.GaussianBlur(Ixy, (ksize, ksize), sigmaX=2)
+
+        # Harris response
+        det = Sxx * Syy - Sxy ** 2
+        trace = Sxx + Syy
+        R = det - k * (trace ** 2)
+
+        # Non-maximum suppression
+        R_max = np.max(R)
+        R_scaled = R / R_max
+        corners = np.argwhere(R_scaled > threshold)
+
+        end_time = time.time()
+        time_taken = end_time - start_time
+
+        color_image_with_corners, gray_image_with_corners = self.draw_corners(corners, (255, 0, 0))
+
+        return color_image_with_corners, gray_image_with_corners, time_taken
+
+    def draw_corners(self, corners, color):
+        gray_image = self.gray_image.copy()
+        gray_image = cv2.cvtColor(gray_image, cv2.COLOR_GRAY2BGR)
+
+        color_image = self.image.copy()
+
+        for corner in corners:
+            cv2.circle(gray_image, (corner[1], corner[0]), 1, color, 1)
+            cv2.circle(color_image, (corner[1], corner[0]), 1, color, 1)
+
+        return color_image, gray_image
