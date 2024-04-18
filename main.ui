@@ -267,57 +267,221 @@ QPlotWidget{
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="PlotWidget" name="wgt_img_input" native="true">
-        <property name="whatsThis">
-         <string>Widget Holding the opened image</string>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Tab 1</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout" rowstretch="1,0">
+        <property name="leftMargin">
+         <number>0</number>
         </property>
-        <property name="styleSheet">
-         <string notr="true">background:beige;</string>
+        <property name="topMargin">
+         <number>0</number>
         </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="PlotWidget" name="wgt_edge_color" native="true">
-          <property name="whatsThis">
-           <string>Widget holding the edge detection result for colored image</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background: crimson</string>
-          </property>
-         </widget>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>5</number>
+        </property>
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="PlotWidget" name="wgt_img_input" native="true">
+            <property name="whatsThis">
+             <string>Widget Holding the opened image</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background:beige;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="PlotWidget" name="wgt_edge_color" native="true">
+              <property name="whatsThis">
+               <string>Widget holding the edge detection result for colored image</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background: crimson</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="PlotWidget" name="wgt_edge_grey" native="true">
+              <property name="whatsThis">
+               <string>Widget holding the edge detection result for greyscale image</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background: grey;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </item>
-        <item>
-         <widget class="PlotWidget" name="wgt_edge_grey" native="true">
-          <property name="whatsThis">
-           <string>Widget holding the edge detection result for greyscale image</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background: grey;</string>
-          </property>
-         </widget>
+        <item row="1" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="lambda_chkBox">
+            <property name="text">
+             <string>Lambda Minus</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="harris_chkBox">
+            <property name="text">
+             <string>Harris Operator</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="0">
-     <widget class="QCheckBox" name="lambda_chkBox">
-      <property name="text">
-       <string>Lambda Minus</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QCheckBox" name="harris_chkBox">
-      <property name="text">
-       <string>Harris Operator</string>
-      </property>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Tab 2</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,1">
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="spacing">
+           <number>80</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QPushButton" name="btn_load_image_1">
+              <property name="minimumSize">
+               <size>
+                <width>121</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Ubuntu</family>
+                <pointsize>-1</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font-size: 15px;</string>
+              </property>
+              <property name="text">
+               <string>Load Image 1</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_load_image_2">
+              <property name="minimumSize">
+               <size>
+                <width>121</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Ubuntu</family>
+                <pointsize>-1</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font-size: 15px;</string>
+              </property>
+              <property name="text">
+               <string>Load Image 2</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_match">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>-1</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">font-size: 15px;</string>
+            </property>
+            <property name="text">
+             <string>Match</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,2">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="PlotWidget" name="wgt_sift_input_1" native="true">
+              <property name="whatsThis">
+               <string>Widget holding the edge detection result for colored image</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background: crimson</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="PlotWidget" name="wgt_sift_input_2" native="true">
+              <property name="whatsThis">
+               <string>Widget holding the edge detection result for greyscale image</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background: darkblue;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="PlotWidget" name="wgt_sift_output" native="true">
+            <property name="whatsThis">
+             <string>Widget Holding the opened image</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background:beige;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -359,4 +523,7 @@ QPlotWidget{
  </customwidgets>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>
