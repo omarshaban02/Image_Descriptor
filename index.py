@@ -72,10 +72,7 @@ class ImageDescriptor(QMainWindow, ui):
         # reset when load a new image
         self.lambda_lcdNumber.display(0)
         self.harris_lcdNumber.display(0)
-        self.harris_chkBox.setCheckState(False)
-        self.lambda_chkBox.setCheckState(False)
-        self.item_output_grey.clear()
-        self.item_output_color.clear()
+        self.corner_detection()
 
 
         
