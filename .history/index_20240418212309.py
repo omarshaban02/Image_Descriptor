@@ -67,7 +67,7 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
     ##############################################################################################                
     ############################## SIFT/Harris Functions #########################################
     
-    def calc_NCC(self, descriptor1, descriptor2, mean_1, mean_2):
+    def calc_NCC(descriptor1, descriptor2, mean_1, mean_2):
         """Calculates the Normalized Cross Correlation for two image descriptors
 
         Args:
@@ -84,7 +84,7 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         return ncc
     
     
-    def calc_SSD(self,descriptor1, descriptor2):
+    def calc_SSD(descriptor1, descriptor2):
         """Calculates the Sum of Squared Difference between two image descriptors
 
         Args:
@@ -174,8 +174,8 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         matching_result_SSD_img = cv2.drawMatches(self.loaded_image_SIFT_1, keypoints1, self.loaded_image_SIFT_2, keypoints2, matching_result_SSD[:N], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
         matching_result_NCC_img = cv2.drawMatches(self.loaded_image_SIFT_1, keypoints1, self.loaded_image_SIFT_2, keypoints2, matching_result_NCC[:N], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
         
-        self.display_image(self.item_SIFT_output_SSD, cv2.rotate(matching_result_SSD_img, cv2.ROTATE_90_CLOCKWISE))
-        self.display_image(self.item_SIFT_output_NCC, cv2.rotate(matching_result_NCC_img, cv2.ROTATE_90_CLOCKWISE))
+        self.display_image(self.item_SIFT_output_SSD, matching_result_SSD_img)
+        self.display_image(self.item_SIFT_output_NCC, matching_result_NCC_img)
         
         
     
@@ -207,14 +207,13 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
             self.display_image(self.item_input, self.loaded_image)
             
         elif target_image == 1:
-            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            image = cv2.rotate(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE), cv2.ROTATE_90_CLOCKWISE)
             self.loaded_image_SIFT_1 = image
-            self.display_image(self.item_SIFT_input_1, cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE))
-        
+            self.display_image(self.item_SIFT_input_1, self.loaded_image_SIFT_1)
         elif target_image == 2:
-            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            image = cv2.rotate(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE), cv2.ROTATE_90_CLOCKWISE)
             self.loaded_image_SIFT_2 = image
-            self.display_image(self.item_SIFT_input_2, cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE))
+            self.display_image(self.item_SIFT_input_2, self.loaded_image_SIFT_2)
             
         # reset when load a new image
         self.lambda_lcdNumber.display(0)

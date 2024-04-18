@@ -174,8 +174,8 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         matching_result_SSD_img = cv2.drawMatches(self.loaded_image_SIFT_1, keypoints1, self.loaded_image_SIFT_2, keypoints2, matching_result_SSD[:N], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
         matching_result_NCC_img = cv2.drawMatches(self.loaded_image_SIFT_1, keypoints1, self.loaded_image_SIFT_2, keypoints2, matching_result_NCC[:N], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
         
-        self.display_image(self.item_SIFT_output_SSD, cv2.rotate(matching_result_SSD_img, cv2.ROTATE_90_CLOCKWISE))
-        self.display_image(self.item_SIFT_output_NCC, cv2.rotate(matching_result_NCC_img, cv2.ROTATE_90_CLOCKWISE))
+        self.display_image(self.item_SIFT_output_SSD, matching_result_SSD_img)
+        self.display_image(self.item_SIFT_output_NCC, matching_result_NCC_img)
         
         
     

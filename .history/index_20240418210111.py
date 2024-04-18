@@ -11,7 +11,7 @@ import time
 
 ui, _ = loadUiType('main.ui')
 
-class ImageDescriptor(QMainWindow, Ui_MainWindow):
+class ImageDescriptor(QMainWindow, ui):
     def __init__(self):
         super(ImageDescriptor, self).__init__()
         self.setupUi(self)
@@ -26,8 +26,7 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         self.loaded_image_SIFT_2 = None
         
         self.plotwidget_set = [self.wgt_img_input, self.wgt_edge_color, self.wgt_edge_grey,
-                               self.wgt_SIFT_input_1, self.wgt_SIFT_input_2, self.wgt_SIFT_output_SSD,
-                               self.wgt_SIFT_output_NCC]
+                               self.wgt_SIFT_input_1, self.wgt_SIFT_input_2,]
         
         # Create an image item for each plot-widget
         self.image_item_set = [self.item_input, self.item_output_grey, self.item_output_color,
@@ -37,14 +36,10 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         
         self.init_application()
         
-    ############################### Connections ##################################################
         # Connect Openfile Action to its function
-        self.actionOpen.triggered.connect(lambda: self.open_image(0))
+        self.actionOpen.triggered.connect(self.open_image)
         self.lambda_chkBox.clicked.connect(self.corner_detection)
-        
-        self.btn_SIFT_open_1.clicked.connect(lambda: self.open_image(1))
-        self.btn_SIFT_open_2.clicked.connect(lambda: self.open_image(2))
-        self.btn_SIFT_match.clicked.connect(lambda: self.output_matches(10))
+    ############################### Connections ##################################################
             
     ################################ Corner Detection Lambda Minus ###############################
     def corner_detection(self):
@@ -67,7 +62,7 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
     ##############################################################################################                
     ############################## SIFT/Harris Functions #########################################
     
-    def calc_NCC(self, descriptor1, descriptor2, mean_1, mean_2):
+    def calc_NCC(descriptor1, descriptor2, mean_1, mean_2):
         """Calculates the Normalized Cross Correlation for two image descriptors
 
         Args:
@@ -84,7 +79,7 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         return ncc
     
     
-    def calc_SSD(self,descriptor1, descriptor2):
+    def calc_SSD(descriptor1, descriptor2):
         """Calculates the Sum of Squared Difference between two image descriptors
 
         Args:
@@ -96,8 +91,6 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         """
         ssd = np.sqrt(np.sum((descriptor1 - descriptor2) ** 2))
         return ssd
-
-
 
     def match_descriptors_ssd(self, descriptors_1, descriptors_2):
         matches = []
@@ -120,7 +113,6 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         matches = sorted(matches, key=lambda x: self.calc_SSD(descriptors_1[x[0]], descriptors_2[x[1]]))
         
         return matches
-    
     
     def match_descriptors_ncc(self,descriptors_1, descriptors_2):
     
@@ -148,36 +140,12 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
         return matches
     
     # TODO - REMOVE CV2 SIFT AND ADD OUR OWN
-    def output_matches(self, N = 10):
-        """Displays matching results for SIFT
-
-        Args:
-            N (int, optional): Number of desired matches to be displayed. Defaults to 10.
-        """
-        
-        ###### SECTION TO BE CHANGED #####
+    def output_matches(self):
         sift = cv2.SIFT_create()
         
-        keypoints1, descriptors_1 = sift.detectAndCompute(self.loaded_image_SIFT_1, None)
-        keypoints2, descriptors_2 = sift.detectAndCompute(self.loaded_image_SIFT_2, None)
+        keypoints1, descriptors1 = sift.detectAndCompute(self.loaded_image, None)
         
-        ###### SECTION TO BE CHANGED #####
-        
-        
-        matching_result_SSD = self.match_descriptors_ssd(descriptors_1, descriptors_2)
-        matching_result_NCC = self.match_descriptors_ncc(descriptors_1, descriptors_2)
-        
-        # Convert indices to DMatch Objects for OpenCV drawMatches
-        matching_result_SSD = [cv2.DMatch(idx1, idx2, 0) for idx1, idx2 in matching_result_SSD]
-        matching_result_NCC = [cv2.DMatch(idx1, idx2, 0) for idx1, idx2 in matching_result_NCC]
-        
-        matching_result_SSD_img = cv2.drawMatches(self.loaded_image_SIFT_1, keypoints1, self.loaded_image_SIFT_2, keypoints2, matching_result_SSD[:N], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-        matching_result_NCC_img = cv2.drawMatches(self.loaded_image_SIFT_1, keypoints1, self.loaded_image_SIFT_2, keypoints2, matching_result_NCC[:N], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-        
-        self.display_image(self.item_SIFT_output_SSD, cv2.rotate(matching_result_SSD_img, cv2.ROTATE_90_CLOCKWISE))
-        self.display_image(self.item_SIFT_output_NCC, cv2.rotate(matching_result_NCC_img, cv2.ROTATE_90_CLOCKWISE))
-        
-        
+        matching_result_SSD = self.match_descriptors_ssd(self.features.descriptors_1, self.features.descriptors_2)
     
     ##############################################################################################    
     ################################# Misc Functions #############################################
@@ -197,24 +165,17 @@ class ImageDescriptor(QMainWindow, Ui_MainWindow):
     def load_img_file(self, image_path, target_image = 0):
         
         # Loads the image using imread, converts it to RGB, then rotates it 90 degrees clockwise
+        image = cv2.rotate(cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB), cv2.ROTATE_90_CLOCKWISE)
         
         if target_image == 0:
-            image = cv2.rotate(cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB), cv2.ROTATE_90_CLOCKWISE)
             self.loaded_image = image
             self.img_obj = Image(self.loaded_image)
             self.gray_scale_image = self.img_obj.gray_scale_image
             self.features = Features(self.loaded_image)
             self.display_image(self.item_input, self.loaded_image)
-            
         elif target_image == 1:
-            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-            self.loaded_image_SIFT_1 = image
-            self.display_image(self.item_SIFT_input_1, cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE))
-        
-        elif target_image == 2:
-            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-            self.loaded_image_SIFT_2 = image
-            self.display_image(self.item_SIFT_input_2, cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE))
+            self.loaded_image_SIFT_1 = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            self.display_image
             
         # reset when load a new image
         self.lambda_lcdNumber.display(0)
