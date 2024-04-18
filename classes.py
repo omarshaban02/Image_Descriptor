@@ -106,7 +106,7 @@ class Features:
 
         return sobelx, sobely, sobelxy
 
-    def find_corners(self):
+    def find_corners(self, th=0.1):
         """
         Detects corners in an image using the lambda minus algorithm.
 
@@ -138,7 +138,11 @@ class Features:
                 eigenvalues[y, x] = np.linalg.eigvals(M).min()
 
         # Apply thresholding
-        threshold = 0.1 * eigenvalues.max()  # You can adjust this threshold
+        # eigenvalues_max = eigenvalues.max()
+        # eigenvalues_scaled = eigenvalues / eigenvalues_max
+        # corners = np.where(eigenvalues > threshold)
+
+        threshold = th * eigenvalues.max()
         corners = np.where(eigenvalues > threshold)
         end_time = time.time()
         time_taken = end_time - start_time

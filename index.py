@@ -25,7 +25,7 @@ class ImageDescriptor(QMainWindow, ui):
         self.loaded_image_SIFT_2 = None
         self.sift = SIFT()
 
-        self.plotwidget_set = [self.wgt_img_input, self.wgt_edge_color, self.wgt_edge_grey,
+        self.plotwidget_set = [self.wgt_img_input, self.wgt_edge_color, self.wgt_edge_grey_2,
                                self.wgt_SIFT_input_1, self.wgt_SIFT_input_2, self.wgt_SIFT_output_SSD,
                                self.wgt_SIFT_output_NCC]
 
@@ -41,6 +41,8 @@ class ImageDescriptor(QMainWindow, ui):
         # Connect Openfile Action to its function
         self.actionOpen.triggered.connect(lambda: self.open_image(0))
         self.lambda_chkBox.clicked.connect(self.corner_detection)
+        self.harris_th_slider.valueChanged.connect(self.corner_detection)
+        self.lambda_th_slider.valueChanged.connect(self.corner_detection)
 
         self.btn_SIFT_open_1.clicked.connect(lambda: self.open_image(1))
         self.btn_SIFT_open_2.clicked.connect(lambda: self.open_image(2))
@@ -50,14 +52,18 @@ class ImageDescriptor(QMainWindow, ui):
     def corner_detection(self):
         if self.features is not None:
             if self.lambda_chkBox.isChecked():
-                self.color_detected_img, self.gray_detected_img, self.time_taken = self.features.find_corners()
+                self.color_detected_img, self.gray_detected_img, self.time_taken = \
+                    self.features.find_corners(th=(self.lambda_th_slider.value() / 100))
                 self.lambda_lcdNumber.display(self.time_taken)
+                self.lambda_th_lcdNumber.display(self.lambda_th_slider.value() / 100)
                 self.display_image(self.item_output_grey, self.gray_detected_img)
                 self.display_image(self.item_output_color, self.color_detected_img)
 
             elif self.harris_chkBox.isChecked():
-                self.color_detected_img, self.gray_detected_img, self.time_taken = self.features.harris_corner_detection()
+                self.color_detected_img, self.gray_detected_img, self.time_taken = \
+                    self.features.harris_corner_detection(threshold=(self.harris_th_slider.value() / 1000))
                 self.harris_lcdNumber.display(self.time_taken)
+                self.harris_th_lcdNumber.display(self.harris_th_slider.value() / 1000)
                 self.display_image(self.item_output_grey, self.gray_detected_img)
                 self.display_image(self.item_output_color, self.color_detected_img)
         else:
