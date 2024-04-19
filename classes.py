@@ -433,7 +433,7 @@ class SIFT:
 
         for keypoint, orientation in zip(keypoints, orientations):
             i, j, _ = keypoint
-            cv2.circle(output_image, (j, i), radius=5, color=(255, 0, 0), thickness=1)
+            cv2.circle(output_image, (j, i), radius=1, color=(255, 0, 0), thickness=1)
             angle = orientation * np.pi / 180
             endpoint_x = int(j + 10 * np.cos(angle))
             endpoint_y = int(i + 10 * np.sin(angle))
@@ -446,6 +446,6 @@ class SIFT:
 
         for keypoint in keypoints:
             i, j, _ = keypoint
-            cv2.circle(output_image, (j, i), radius=5, color=(255, 0, 0), thickness=-1)
+            cv2.circle(output_image, (j, i), radius=1, color=(255, 0, 0), thickness=-1)
 
         return output_image

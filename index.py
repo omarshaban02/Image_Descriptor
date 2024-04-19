@@ -20,19 +20,21 @@ class ImageDescriptor(QMainWindow, ui):
         self.gray_detected_img = None
         self.color_detected_img = None
         self.features = None
+        self.loaded_image_SIFT = None
         self.loaded_image_SIFT_1 = None
         self.loaded_image_SIFT_2 = None
         self.sift = SIFT()
 
         self.plotwidget_set = [self.wgt_img_input, self.wgt_edge_color, self.wgt_edge_grey_2,
                                self.wgt_SIFT_input_1, self.wgt_SIFT_input_2, self.wgt_SIFT_output_SSD,
-                               self.wgt_SIFT_output_NCC]
+                               self.wgt_SIFT_output_NCC, self.wgt_SIFT_input, self.wgt_SIFT_output]
 
         # Create an image item for each plot-widget
         self.image_item_set = [self.item_input, self.item_output_grey, self.item_output_color,
                                self.item_SIFT_input_1, self.item_SIFT_input_2,
                                self.item_SIFT_output_SSD, self.item_SIFT_output_NCC,
-                               ] = [pg.ImageItem() for _ in range(7)]
+                               self.item_SIFT_input, self.item_SIFT_output,
+                               ] = [pg.ImageItem() for _ in range(9)]
 
         self.init_application()
 
@@ -46,6 +48,9 @@ class ImageDescriptor(QMainWindow, ui):
         self.btn_SIFT_open_1.clicked.connect(lambda: self.open_image(1))
         self.btn_SIFT_open_2.clicked.connect(lambda: self.open_image(2))
         self.btn_SIFT_match.clicked.connect(lambda: self.output_matches(10))
+
+        self.btn_SIFT_open_3.clicked.connect(lambda: self.open_image(3))
+        self.btn_SIFT_match_2.clicked.connect(lambda: self.apply_sift(self.loaded_image_SIFT))
 
     ################################ Corner Detection Lambda Minus ###############################
     def corner_detection(self):
@@ -153,8 +158,8 @@ class ImageDescriptor(QMainWindow, ui):
             N (int, optional): Number of desired matches to be displayed. Defaults to 10.
         """
 
-        keypoints1, descriptors_1 = self.apply_sift(self.loaded_image_SIFT_1)
-        keypoints2, descriptors_2 = self.apply_sift(self.loaded_image_SIFT_2)
+        keypoints1, descriptors_1 = self.apply_sift(self.loaded_image_SIFT_1, False)
+        keypoints2, descriptors_2 = self.apply_sift(self.loaded_image_SIFT_2, False)
 
         matching_result_SSD = self.match_descriptors_ssd(descriptors_1, descriptors_2)
         matching_result_NCC = self.match_descriptors_ncc(descriptors_1, descriptors_2)
@@ -174,14 +179,19 @@ class ImageDescriptor(QMainWindow, ui):
         self.display_image(self.item_SIFT_output_NCC, cv2.rotate(matching_result_NCC_img, cv2.ROTATE_90_CLOCKWISE))
 
     ###################################### SIFT #########################################
-    def apply_sift(self, image):
-        # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    def apply_sift(self, image, draw=True):
         DoG_pyramid, scales = self.sift.scale_space_constuction(image)
         keypoints = self.sift.find_keypoints(DoG_pyramid)
         refined_keypoints = self.sift.refine_keypoints(keypoints, DoG_pyramid)
         # orientations = self.sift.assign_orientation(refined_keypoints, DoG_pyramid)
         discriptors = self.sift.calculate_descriptor_vector(image, refined_keypoints)
-        return refined_keypoints, discriptors
+        print("SIFT is Done")
+        if draw:
+            output_image = self.sift.draw_keypoints(image, refined_keypoints)
+            self.display_image(self.item_SIFT_output, cv2.rotate(output_image, cv2.ROTATE_90_CLOCKWISE))
+        else:
+            return refined_keypoints, discriptors
+
 
     ################################# Misc Functions #############################################
 
@@ -215,6 +225,11 @@ class ImageDescriptor(QMainWindow, ui):
             image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
             self.loaded_image_SIFT_2 = image
             self.display_image(self.item_SIFT_input_2, cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE))
+
+        elif target_image == 3:
+            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            self.loaded_image_SIFT = image
+            self.display_image(self.item_SIFT_input, cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE))
 
         # reset when load a new image
         self.lambda_lcdNumber.display(0)

@@ -281,7 +281,7 @@ QPlotWidget{
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Corner Detection</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout" stretch="6,1">
         <property name="leftMargin">
@@ -592,9 +592,93 @@ QPlotWidget{
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>Feature Extraction: SIFT</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,10">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <property name="spacing">
+           <number>600</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="btn_SIFT_open_3">
+            <property name="minimumSize">
+             <size>
+              <width>121</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>-1</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">font-size: 15px;</string>
+            </property>
+            <property name="text">
+             <string>Load Image</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_SIFT_match_2">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>-1</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">font-size: 15px;</string>
+            </property>
+            <property name="text">
+             <string>Apply</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="PlotWidget" name="wgt_SIFT_input" native="true">
+            <property name="whatsThis">
+             <string>Widget holding the edge detection result for greyscale image</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background: darkblue;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="PlotWidget" name="wgt_SIFT_output" native="true">
+            <property name="whatsThis">
+             <string>Widget Holding the opened image</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background:beige;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>Features Matching</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7" rowstretch="0,1" columnstretch="1,2">
         <property name="leftMargin">
@@ -628,7 +712,6 @@ QPlotWidget{
                <font>
                 <family>Ubuntu</family>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -652,7 +735,6 @@ QPlotWidget{
                <font>
                 <family>Ubuntu</family>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -678,7 +760,6 @@ QPlotWidget{
              <font>
               <family>Ubuntu</family>
               <pointsize>-1</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -836,7 +917,7 @@ QPlotWidget{
      <x>0</x>
      <y>0</y>
      <width>999</width>
-     <height>30</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -868,7 +949,6 @@ QPlotWidget{
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>
