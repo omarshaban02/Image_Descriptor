@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 from PyQt5.uic import loadUiType
 from classes import Image, Features, SIFT
+import time
 
 ui, _ = loadUiType('main.ui')
 
@@ -180,12 +181,16 @@ class ImageDescriptor(QMainWindow, ui):
 
     ###################################### SIFT #########################################
     def apply_sift(self, image, draw=True):
+        t_start = time.time()
         DoG_pyramid, scales = self.sift.scale_space_constuction(image)
         keypoints = self.sift.find_keypoints(DoG_pyramid)
         refined_keypoints = self.sift.refine_keypoints(keypoints, DoG_pyramid)
         # orientations = self.sift.assign_orientation(refined_keypoints, DoG_pyramid)
         discriptors = self.sift.calculate_descriptor_vector(image, refined_keypoints)
+        t_end = time.time()
+        t_total = t_end - t_start
         print("SIFT is Done")
+        print("Time taken in SIFT:", np.round(t_total, 2), "sec")
         if draw:
             output_image = self.sift.draw_keypoints(image, refined_keypoints)
             self.display_image(self.item_SIFT_output, cv2.rotate(output_image, cv2.ROTATE_90_CLOCKWISE))
