@@ -1,12 +1,11 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog
 from ui import Ui_MainWindow
 import pyqtgraph as pg
 import numpy as np
 import cv2
 from PyQt5.uic import loadUiType
 from classes import Image, Features, SIFT
-import time
 
 ui, _ = loadUiType('main.ui')
 

@@ -4,6 +4,26 @@ import time
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 
+class WorkerSignals(QObject):
+    finished = pyqtSignal()
+    update = pyqtSignal(np.ndarray)
+    calc_area_perimeter = pyqtSignal(float, float)
+
+
+class WorkerThread(QThread):
+    def __init__(self, input_image, contour_points, epochs=100, edges_img=None):
+        super(WorkerThread, self).__init__()
+        self.signals = WorkerSignals()
+        self.input_image = input_image
+        self.contour_points = np.array(contour_points).astype(int)
+        self.epochs = epochs
+        self.edges_img = edges_img
+        self.contour = None
+
+    def run(self):
+        pass
+
+
 class Image:
     def __init__(self, image):
         self._original_img = image
@@ -262,50 +282,84 @@ class SIFT:
                 lower_scale = octave[scale_index - 1]
                 upper_scale = octave[scale_index + 1]
 
-                is_maxima = (current_scale > lower_scale) & (current_scale > upper_scale)
-                is_minima = (current_scale < lower_scale) & (current_scale < upper_scale)
+                # Define the neighborhood indices
+                neighborhood_indices = [
+                    (-1, -1), (-1, 0), (-1, 1),
+                    (0, -1), (0, 0), (0, 1),
+                    (1, -1), (1, 0), (1, 1)
+                ]
 
-                maxima_indices = np.argwhere(is_maxima)
-                minima_indices = np.argwhere(is_minima)
+                maxima_count = 0
+                minima_count = 0
+                for i in range(1, current_scale.shape[0] - 1):
+                    for j in range(1, current_scale.shape[1] - 1):
+                        pixel = current_scale[i, j]
+                        is_maxima = True
+                        is_minima = True
+                        for di, dj in neighborhood_indices:
+                            if not (
+                                    lower_scale[i + di, j + dj] < pixel and upper_scale[i + di, j + dj] < pixel
+                            ):
+                                is_maxima = False
+                            if not (
+                                    lower_scale[i + di, j + dj] > pixel and upper_scale[i + di, j + dj] > pixel
+                            ):
+                                is_minima = False
 
-                keypoints.extend([(i, j, octave_index) for i, j in maxima_indices])
-                keypoints.extend([(i, j, octave_index) for i, j in minima_indices])
+                        if is_maxima:
+                            maxima_count += 1
+                            keypoints.append((i, j, octave_index))
+                        elif is_minima:
+                            minima_count += 1
+                            keypoints.append((i, j, octave_index))
 
+                print(f"Octave{octave_index}, Scale{scale_index}, No of maxima:", maxima_count)
+                print(f"Octave{octave_index}, Scale{scale_index}, No of minima:", minima_count)
+                print()
+
+        print("Total keypoints:", len(keypoints))
         return keypoints
 
-    def refine_keypoints(self, keypoints, DoG_pyramid):
+    def refine_keypoints(self, keypoints, DoG_pyramid, contrast_threshold=0.04, edge_threshold=10):
         refined_keypoints = []
 
         for i, j, octave_index in keypoints:
             current_octave = DoG_pyramid[octave_index]
             current_img = current_octave[1]
 
-            if (i > 0 and i < current_img.shape[0] - 1 and j > 0 and j < current_img.shape[1] - 1):
+            # Check if the keypoint is within the image boundaries
+            if 0 < i < current_img.shape[0] - 1 and 0 < j < current_img.shape[1] - 1:
 
+                # Extract the current, upper, and lower scales
                 current_scale = current_img[i, j]
                 lower_scale = current_octave[0][i, j]
                 upper_scale = current_octave[2][i, j]
 
+                # Compute the difference of Gaussians
                 delta_dog = np.abs(current_scale - lower_scale) + \
-                    np.abs(current_scale - upper_scale)
+                            np.abs(current_scale - upper_scale)
 
+                # Check if the keypoint is a local extremum
                 if (current_scale > lower_scale and current_scale > upper_scale and
-                        current_scale > self.contrast_threshold * delta_dog):
+                        current_scale > contrast_threshold * delta_dog):
 
+                    # Compute the curvature ratio
                     Dxx = current_img[i, j + 1] + \
-                        current_img[i, j - 1] - 2 * current_scale
+                          current_img[i, j - 1] - 2 * current_scale
                     Dyy = current_img[i + 1, j] + \
-                        current_img[i - 1, j] - 2 * current_scale
+                          current_img[i - 1, j] - 2 * current_scale
                     Dxy = (current_img[i + 1, j + 1] - current_img[i + 1, j - 1] -
                            current_img[i - 1, j + 1] + current_img[i - 1, j - 1]) / 4
                     trace = Dxx + Dyy
                     determinant = Dxx * Dyy - Dxy ** 2
                     curvature_ratio = trace ** 2 / \
-                        determinant if determinant != 0 else float('inf')
+                                      determinant if determinant != 0 else float('inf')
 
-                    if curvature_ratio < (self.edge_threshold + 1) ** 2 / self.edge_threshold:
+                    # Check if the curvature ratio satisfies the edge threshold
+                    if curvature_ratio < (edge_threshold + 1) ** 2 / edge_threshold:
                         refined_keypoints.append((i, j, octave_index))
 
+        print("Total refined_keypoints:", len(refined_keypoints))
         return refined_keypoints
 
     def assign_orientation(self, refined_keypoints, DoG_pyramid):
