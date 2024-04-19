@@ -1,12 +1,11 @@
 import sys
+import threading
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog
-from ui import Ui_MainWindow
 import pyqtgraph as pg
 import numpy as np
 import cv2
 from PyQt5.uic import loadUiType
-from classes import Image, Features, SIFT
-import time
+from classes import Image, Features, SIFT, WorkerThread
 
 ui, _ = loadUiType('main.ui')
 
@@ -39,6 +38,9 @@ class ImageDescriptor(QMainWindow, ui):
 
         self.init_application()
 
+        self.sift_thread = None
+        self.match_thread = None
+
         ############################### Connections ##################################################
         # Connect Openfile Action to its function
         self.actionOpen.triggered.connect(lambda: self.open_image(0))
@@ -51,7 +53,7 @@ class ImageDescriptor(QMainWindow, ui):
         self.btn_SIFT_match.clicked.connect(lambda: self.output_matches(10))
 
         self.btn_SIFT_open_3.clicked.connect(lambda: self.open_image(3))
-        self.btn_SIFT_match_2.clicked.connect(lambda: self.apply_sift(self.loaded_image_SIFT))
+        self.btn_SIFT_match_2.clicked.connect(self.apply_sift)
 
     ################################ Corner Detection Lambda Minus ###############################
     def corner_detection(self):
@@ -151,16 +153,24 @@ class ImageDescriptor(QMainWindow, ui):
 
         return matches
 
-    # TODO - REMOVE CV2 SIFT AND ADD OUR OWN
+
     def output_matches(self, N=10):
         """Displays matching results for SIFT
 
         Args:
             N (int, optional): Number of desired matches to be displayed. Defaults to 10.
         """
+        match_thread = threading.Thread(target=self.display_match, args=(N,))
+        match_thread.start()
 
-        keypoints1, descriptors_1 = self.apply_sift(self.loaded_image_SIFT_1, False)
-        keypoints2, descriptors_2 = self.apply_sift(self.loaded_image_SIFT_2, False)
+    def display_match(self,N):
+
+        # Initialize SIFT detector
+        sift = cv2.SIFT_create()
+
+        # Detect keypoints and compute descriptors for both images
+        keypoints1, descriptors_1 = sift.detectAndCompute(self.loaded_image_SIFT_1, None)
+        keypoints2, descriptors_2 = sift.detectAndCompute(self.loaded_image_SIFT_2, None)
 
         matching_result_SSD = self.match_descriptors_ssd(descriptors_1, descriptors_2)
         matching_result_NCC = self.match_descriptors_ncc(descriptors_1, descriptors_2)
@@ -180,23 +190,16 @@ class ImageDescriptor(QMainWindow, ui):
         self.display_image(self.item_SIFT_output_NCC, cv2.rotate(matching_result_NCC_img, cv2.ROTATE_90_CLOCKWISE))
 
     ###################################### SIFT #########################################
-    def apply_sift(self, image, draw=True):
-        t_start = time.time()
-        DoG_pyramid, scales = self.sift.scale_space_constuction(image)
-        keypoints = self.sift.find_keypoints(DoG_pyramid)
-        refined_keypoints = self.sift.refine_keypoints(keypoints, DoG_pyramid)
-        # orientations = self.sift.assign_orientation(refined_keypoints, DoG_pyramid)
-        discriptors = self.sift.calculate_descriptor_vector(image, refined_keypoints)
-        t_end = time.time()
-        t_total = t_end - t_start
-        print("SIFT is Done")
-        print("Time taken in SIFT:", np.round(t_total, 2), "sec")
-        if draw:
-            output_image = self.sift.draw_keypoints(image, refined_keypoints)
-            self.display_image(self.item_SIFT_output, cv2.rotate(output_image, cv2.ROTATE_90_CLOCKWISE))
-        else:
-            return refined_keypoints, discriptors
+    def apply_sift(self):
+        self.sift_thread = WorkerThread(self.loaded_image_SIFT)
+        self.sift_thread.start()
+        self.sift_thread.signals.get_keypoints_descriptors.connect(self.display_sift_image)
 
+        # return refined_keypoints, discriptors
+
+    def display_sift_image(self, keypoints, descriptors):
+        output_image = self.sift.draw_keypoints(self.loaded_image_SIFT, keypoints)
+        self.display_image(self.item_SIFT_output, cv2.rotate(output_image, cv2.ROTATE_90_CLOCKWISE))
 
     ################################# Misc Functions #############################################
 
