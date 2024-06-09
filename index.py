@@ -5,7 +5,10 @@ import pyqtgraph as pg
 import numpy as np
 import cv2
 from PyQt5.uic import loadUiType
-from classes import Image, Features, SIFT, WorkerThread
+from Classes.Image import Image
+from Classes.Features import Features
+from Classes.Sift import SIFT
+from Classes.Thread import WorkerThread
 
 ui, _ = loadUiType('main.ui')
 
